@@ -18,7 +18,7 @@ vector<string> markMov(char map[][8],int playerID);
 bool isValidMov(char map[][8],int row,int col,int id);
 
 bool isValidInput(string input,vector<string> valid_set);
-
+    int which=1;
 //判断每一步输入是否合理，输入为一个输入语句，和一个储存有合理语句的向量
 void removeMarks(char map[][8]);
 
@@ -164,18 +164,24 @@ void play(char map[][8])
     cin>>s;
     playerSB='W';
     AISB='B';
+  // playerSB='B';
+    //    AISB='W';
+
     if (s=="0")
     {
         playerSB='B';
         AISB='W';
         turn=0;
+        which=0;
     }
+
     bool flg1=0,flg2=0;
     while(1)
     {
         if(!turn)
         {
-            vector<string> posMovs=markMov(map,turn);
+            removeMarks(map);
+            vector<string> posMovs=markMov(map,which);
             splash_screen(map);
             if(posMovs.size()==0)
             {
@@ -291,7 +297,7 @@ int solve(char map[][8],int alpha,int beta,int level,int turn)
 
     int bestmov=0;
     int val;
-    vector<string> possibleMovs=markMov(map,turn);
+    vector<string> possibleMovs=markMov(map,!which);
     if(level==0) return Eval(map);
     if(possibleMovs.size()==0) return(Eval(map));
     removeMarks(map);
@@ -342,16 +348,21 @@ int solve(char map[][8],int alpha,int beta,int level,int turn)
 }
 int Eval(char map[][8]){
     int scoremap[8][8];
+    int cnt=0;
     for(int i=0;i<8;i++)
-    for(int j=0;j<8;j++)
+    for(int j=0;j<8;j++){
         if(map[i][j]==AISB) scoremap[i][j]=1;
-        else if(map[i][j]==' ')scoremap[i][j]=0;
+        else if(map[i][j]==' '){scoremap[i][j]=0;
+            cnt++;
+        }
         else scoremap[i][j]=-1;
+    }
+    
     vector<string> s= markMov(map,AISB);
     int score;
-    score+=400*s.size();
-    score+=80*(scoremap[0][0]+scoremap[7][7]+scoremap[0][7]+scoremap[7][0]);
-    score-=90*(scoremap[0][1]+scoremap[1][0]+scoremap[6][0]+scoremap[0][6]+scoremap[6][7]+scoremap[7][6]+scoremap[7][1]+scoremap[1][7]);
+    score+=320*s.size();
+    score+=150*(scoremap[0][0]+scoremap[7][7]+scoremap[0][7]+scoremap[7][0]);
+    score-=20*(scoremap[0][1]+scoremap[1][0]+scoremap[6][0]+scoremap[0][6]+scoremap[6][7]+scoremap[7][6]+scoremap[7][1]+scoremap[1][7]);
     for(int i=0;i<8;i++)
         for(int j=0;j<8;j++)
         {
@@ -359,5 +370,37 @@ int Eval(char map[][8]){
                 score+=(30*scoremap[i][j]);
             else score+=10*scoremap[i][j];
         }
+    if(map[0][0]==0) 
+    {
+        for(int i=1;i<7;i++)
+        {
+            score+=map[0][i]*30;
+            score+=map[i][0]*30;
+        }
+    }
+    if(map[0][7]==0) 
+    {
+        for(int i=1;i<7;i++)
+        {
+            score+=map[0][i]*30;
+            score+=map[i][7]*30;
+        }
+    }
+    if(map[7][0]==0) 
+    {
+        for(int i=1;i<7;i++)
+        {
+            score+=map[7][i]*30;
+            score+=map[i][0]*30;
+        }
+    }
+    if(map[7][7]==0) 
+    {
+        for(int i=1;i<7;i++)
+        {
+            score+=map[7][i]*30;
+            score+=map[i][7]*30;
+        }
+    }
     return score;
 }
